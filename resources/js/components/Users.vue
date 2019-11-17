@@ -4,10 +4,10 @@
             <div class="col-md-12 mt-3">
                 <div class="card">
                     <div class="card-header"> 
-                        <h1 class="card-title"> Users Table </h1> 
+                        <h1 class="card-title"> Users Data </h1> 
     
                         <div class="card-tools">
-                            <button class="btn btn-success" data-toggle="modal" data-target="#addNewModal">
+                            <button class="btn btn-success" @click="displayModal">
                                 Add New <i class = "fas fa-user-plus fa-fw"></i>
                             </button>
                         </div>
@@ -33,12 +33,12 @@
                                     <td>{{ user.type | textCapitalsed }}</td>
                                     
                                     <td>
-                                        <a href="#" >
+                                        <button @click="editModal(user)"  class="btn btn-link">
                                             <i class ="fas fa-edit green mr-3 "></i>
-                                        </a>
-                                        <a href="#">
+                                        </button>
+                                        <button  @click="deleteUser(user.id)" class="btn btn-link">
                                             <i class ="fas fa-trash  red"></i>
-                                        </a>
+                                        </button>
                                     </td>
                                     <td>{{ user.created_at | formatDate }}</td>
                                 </tr>
@@ -54,12 +54,13 @@
     <div class="modal-dialog " role="document">
         <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title" id="addNewModalLabel">Add new User</h5>
+            <h5 class="modal-title" id="addNewModalLabel" v-if="!editmode">Add new User</h5>
+            <h5 class="modal-title" id="addNewModalLabel" v-if="editmode">Update User</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
             </button>
         </div>
-         <form v-on:submit.prevent="createUser">
+         <form @submit.prevent="editmode ? updateUser() : createUser()">
             <div class="modal-body">
                 <div class="form-group">
                     <input v-model="form.name" type="text" name="name" id="name"
@@ -69,7 +70,14 @@
                 </div>
 
                 <div class="form-group">
-                    <input v-model="form.email" type="email" name="email" id="email"
+                    <input v-model="form.email" v-if="editmode" readonly="readonly" type="email" name="email" id="email"
+                        class="form-control" :class="{ 'is-invalid': form.errors.has('email') }"
+                        placeholder="Enter E-mail address"/>
+                    <has-error :form="form" field="email"></has-error>
+                </div>
+
+                <div class="form-group">
+                    <input v-model="form.email" v-if="!editmode" type="email" name="email" id="email"
                         class="form-control" :class="{ 'is-invalid': form.errors.has('email') }"
                         placeholder="Enter E-mail address"/>
                     <has-error :form="form" field="email"></has-error>
@@ -96,8 +104,8 @@
 
 
 
-                <div class="form-group">
-                    <input v-model="form.password" type="password" name="password"
+                <div class="form-group" v-if="!editmode">
+                    <input  v-model="form.password" type="password" name="password"
                         class="form-control" :class="{ 'is-invalid': form.errors.has('password') }"
                         placeholder="Enter password"/>
                     <has-error :form="form" field="password"></has-error>
@@ -106,7 +114,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Create User</button>
+                    <button v-if ="!editmode" type="submit" class="btn btn-success" >Create User</button>
+                    <button v-if="editmode"  type="submit" class="btn btn-success" >Update User</button>
                 </div>
             </form>
         </div>
@@ -119,10 +128,13 @@
     export default {
         data () {
     return {
+        // Edit the users' data
+        editmode: false,
         // the use object
       users : {},
       // Create a new form instance
       form: new Form({
+        id: '',
         name: '',
         email:'',
         password: '',
@@ -132,25 +144,121 @@
       })
     }
   },
+
+  
   methods: {
+
+    // Update Users function
+      updateUser(){
+          this.$Progress.start();
+        //   console.log("edit");
+            this.form.put('api/user/'+ this.form.id)
+            .then(()=>{
+
+                 toast.fire({
+                icon: 'success',
+                title: 'User updated successfully'
+                });
+
+                Fire.$emit('AfterCreate');
+            // it ends here
+                $('#addNewModal').modal('hide');
+
+            })
+
+
+             this.$Progress.finish()
+             
+            .catch(()=>{
+                this.$Progress.fail();
+            })
+        },
+
+
+      editModal(user){
+          this.editmode = true
+          this.form.reset()
+        //    this.form.clear()
+          $('#addNewModal').modal('show');
+          this.form.fill(user);
+      },
+
+      displayModal(){
+          this.editmode = false
+          this.form.reset()
+        //    this.form.clear()
+          $('#addNewModal').modal('show');
+      },
+      
+      deleteUser(id){
+
+          swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+
+                  if (result.value) {
+                // sendan ajaxrequest to the server
+                this.form.delete('api/user/'+id).then(()=>{
+                   
+                    swal.fire(
+                    'Deleted!',
+                    'User deleted.',
+                    'success'
+                    )
+                    Fire.$emit('AfterCreate')
+                }).catch(()=>{
+                    swal.fire("Failed", "There was an error", "warning");
+                })
+            }
+                
+        })
+
+      },
+
+
       loadUsers(){
          axios.get('api/user').then(({data})=>(this.users = data)); 
       },
       createUser(){
-          this.$Progress.start();
-         this.form.post('api/user') ;
+         this.$Progress.start();
+         this.form.post('api/user') 
+         .then(()=>{
+             
+        //  This a vue js custom event approach
+        Fire.$emit('AfterCreate');
+        // it ends here
         $('#addNewModal').modal('hide');
+
+        // This is to give an alert
         toast.fire({
-        type: 'success',
+        icon: 'success',
         title: 'User created successfully'
         });
 
+        // it ends here
+
          this.$Progress.finish()
             // .then(({ data }) => { console.log(data) });
+         })
+         .catch(()=>{})
       }
   },
+
+        
         created() {
            this.loadUsers();
+
+        //    call the custom event her
+        Fire.$on('AfterCreate', () => {
+            this.loadUsers();
+        });
+        //    setInterval(()=>this.loadUsers(), 3000);
         },
 
         mounted() {

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Passport\HasApiTokens;
+
 class UserController extends Controller
 {
     /**
@@ -13,6 +15,13 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
+
+
     public function index()
     {
         return User::latest()->paginate(10);
@@ -57,6 +66,11 @@ class UserController extends Controller
         //
     }
 
+    public function profile()
+    {
+        return auth('api')->user();
+    }
+
     /**
      * Update the specified resource in storage.
      *
@@ -66,7 +80,17 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+            'name'=> 'required|string|max:191',
+            'type'=> 'required'
+        ]);
+
+        $user = User::findOrfail($id);
+        $user->name = $request->input('name');
+        $user->bio = $request->input('bio');
+        $user->type = $request->input('type');
+        $user->save();
+        return ["User"=>"Updated"];
     }
 
     /**
@@ -77,6 +101,8 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+        return ['message'=>'User deleted'];
     }
 }
