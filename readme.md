@@ -1,1 +1,1 @@
-This a standard laravel project
+This is a laravel and vuejs project
