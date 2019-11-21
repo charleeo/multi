@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="row">
-            <div class="col-md-12 mt-3">
+            <div class="col-md-12 mt-3"  v-if="$gate.isAdminOrAuthor()">
                 <div class="card">
                     <div class="card-header"> 
                         <h1 class="card-title"> Users Data </h1> 
@@ -21,7 +21,7 @@
                                     <th>Name</th>
                                     <th>Eamil</th>
                                     <th>Type</th>
-                                    <th>Modify</th>
+                                    <th v-if="$gate.isAdmin()">Modify</th>
                                     <th>Date Cretaed</th>
                                 </tr>
                             </thead>
@@ -32,7 +32,7 @@
                                     <td>{{ user.email}}</td>
                                     <td>{{ user.type | textCapitalsed }}</td>
                                     
-                                    <td>
+                                    <td v-if="$gate.isAdmin()">
                                         <button @click="editModal(user)"  class="btn btn-link">
                                             <i class ="fas fa-edit green mr-3 "></i>
                                         </button>
@@ -49,7 +49,9 @@
             </div>
         </div>
    
-
+        <div v-if="!$gate.isAdminOrAuthor()">
+            <not-found></not-found>
+        </div>
     <div class="modal fade" id="addNewModal" tabindex="-1" role="dialog" aria-labelledby="addNewModalLabel" aria-hidden="true">
     <div class="modal-dialog " role="document">
         <div class="modal-content">
@@ -221,9 +223,10 @@
 
       },
 
-
       loadUsers(){
-         axios.get('api/user').then(({data})=>(this.users = data)); 
+        if(this.$gate.isAdminOrAuthor()){
+                axios.get('api/user').then(({data})=>(this.users = data)); 
+        }
       },
       createUser(){
          this.$Progress.start();

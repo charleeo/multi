@@ -4,7 +4,7 @@
 	background-repeat: no-repeat;
 	background-position: center;
     background-size: cover;
-    heigth:450px;
+    heigth:450px !important;
 }
 .label-file{
     border: 0
@@ -23,7 +23,7 @@
                 <h5 class="widget-user-desc text-left">Web Designer</h5>
               </div>
               <div class="widget-user-image">
-                <img class="img-circle" src= "/images/avater.png" alt="User Avatar">
+                <img class="img-circle" :src="getProfilePhoto()" alt="User Avatar">
               </div>
               <div class="card-footer">
                 <div class="row">
@@ -56,112 +56,166 @@
               </div>
             </div>
             </div>
-                <div class="col-md-12 ">
-                <div class="card  ">
-                    <div class="card-header">
-                        <span>Activity</span> 
-                        <div class="card-tools">
-                            <button class="btn btn-success"> Settings </button>   
-                        </div>                 
-                    </div>
+                 <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header p-2">
+                        <ul class="nav nav-pills">
+                        <li class="nav-item"><a class="nav-link" href="#activity" data-toggle="tab">Activity</a></li>
+                        <li class="nav-item"><a class="nav-link active show" href="#settings" data-toggle="tab">Settings</a></li>
+                        </ul>
+                    </div><!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <!-- Activity Tab -->
+                            <div class="tab-pane" id="activity">
+                                <h3 class="text-center">Display User Activity</h3>
+                            </div>
+                            <!-- Setting Tab -->
+                            <div class="tab-pane active show" id="settings">
+                                <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="inputName" class="col-sm-2 control-label">Name</label>
 
-                    <form  class="pl-3 pr-3 mt-3">
-                    
-                        <div class="form-group ">
-                        <label> Name</label>
-                            <input v-model="form.name" type="text" name="name" id="name"
-                                class="form-control" :class="{ 'is-invalid': form.errors.has('name') }"
-                                placeholder="Enter name"/>
-                            <has-error :form="form" field="name"></has-error>
+                                    <div class="col-sm-12">
+                                    <input type="" v-model="form.name" class="form-control" id="inputName" placeholder="Name" :class="{ 'is-invalid': form.errors.has('name') }">
+                                     <has-error :form="form" field="name"></has-error>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputEmail" class="col-sm-2 control-label">Email</label>
+
+                                    <div class="col-sm-12">
+                                    <input type="email" v-model="form.email" class="form-control" id="inputEmail" placeholder="Email"  :class="{ 'is-invalid': form.errors.has('email') }">
+                                     <has-error :form="form" field="email"></has-error>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputExperience" class="col-sm-2 control-label">Experience</label>
+
+                                    <div class="col-sm-12">
+                                    <textarea  v-model="form.bio" class="form-control" id="inputExperience" placeholder="Experience" :class="{ 'is-invalid': form.errors.has('bio') }"></textarea>
+                                     <has-error :form="form" field="bio"></has-error>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="photo" class="col-sm-2 control-label">Profile Photo</label>
+                                    <div class="col-sm-12">
+                                        <input type="file" @change="updateProfile" name="photo" class="form-input">
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password" class="col-sm-12 control-label">Passport (leave empty if not changing)</label>
+
+                                    <div class="col-sm-12">
+                                    <input type="password"
+                                        v-model="form.password"
+                                        class="form-control"
+                                        id="password"
+                                        placeholder="Passport"
+                                        :class="{ 'is-invalid': form.errors.has('password') }"
+                                    >
+                                     <has-error :form="form" field="password"></has-error>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-12">
+                                    <button @click.prevent="updateInfo" type="submit" class="btn btn-success">Update</button>
+                                    </div>
+                                </div>
+                                </form>
+                            </div>
+                        <!-- /.tab-pane -->
                         </div>
-
-                        <div class="form-group">
-                        <label> Email </label>
-                            <input v-model="form.email"  type="email" name="email" id="email"
-                                class="form-control" :class="{ 'is-invalid': form.errors.has('email') }"
-                                placeholder="Enter E-mail address"/>
-                            <has-error :form="form" field="email"></has-error>
-                        </div>
-
-                        <div class="form-group">
-                            <label> Experience</label>
-                            <textarea v-model="form.bio"  type="text" name="bio" id="bio"
-                                class="form-control" :class="{ 'is-invalid': form.errors.has('bio') }"
-                                placeholder="What is your life experience">
-                            <has-error :form="form" field="bio"></has-error>
-                            </textarea>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label> Profile Photo </label>
-                            <input  type="file" @change="updateProfile" name="photo" id="photo"
-                                class="form-control label-file" :class="{ 'is-invalid': form.errors.has('photo') }"
-                                >
-                            <has-error :form="form" field="photo"></has-error>
-                        </div>
-
-                        <div class="form-group">
-                            <label> Passport (leave empty if not changing)</label>
-                            <input   type="text" name="password"
-                                class="form-control" :class="{ 'is-invalid': form.errors.has('password') }"
-                                placeholder="passport"/>
-                            <has-error :form="form" field="password"></has-error>
-                        </div>
-
-                        <div class='form-group'>
-                            <button class="btn btn-primary">
-                                    Update 
-                            </button>
-                        </div>
-                        
-                    </form>
+                        <!-- /.tab-content -->
+                    </div><!-- /.card-body -->
                 </div>
-            </div>
+                <!-- /.nav-tabs-custom -->
+          </div>
+          <!-- end tabs -->
         </div>
     </div>
 </template>
 
+
+
 <script>
     export default {
-        data() {
+        data(){
             return {
-
                  form: new Form({
-                    id: '',
-                    name: '',
-                    email:'',
+                    id:'',
+                    name : '',
+                    email: '',
                     password: '',
-                    bio:'',
-                    // type:'',
+                    type: '',
+                    bio: '',
                     photo: ''
-                }),
-
-            }
-               
-        },
-
-        methods:{
-            updateProfile(e){
-               let file = e.target.files[0];
-            //    console.log(file);
-               let reader = new FileReader();
-               reader.onloadend = (file)=>{
-                   console.log("Result", reader.result);
-                this.form.photo = reader.result;
-               }
-               reader.readAsDataURL(file);
+                })
             }
         },
-
-        
         mounted() {
             console.log('Component mounted.')
         },
+        methods:{
+            getProfilePhoto(){
+                let photo = (this.form.photo.length > 200) ? this.form.photo : "images/profile/"+ this.form.photo ;
+                return photo;
+            },
+            updateInfo(){
+                this.$Progress.start();
+                if(this.form.password == ''){
+                    this.form.password = undefined;
+                }
+                this.form.put('api/profile')
+                .then(()=>{
+                     Fire.$emit('AfterCreate');
+                    this.$Progress.finish();
 
-        created(){
-            axios.get('api/profile')
-            .then(({data})=>(this.form.fill(data)));
+                        swal.fire({
+                        type: 'success',
+                        title: 'Success...',
+                        text: 'Profile updates',
+                        icon: 'success',
+                    })
+                })
+                .catch(() => {
+                    this.$Progress.fail();
+                        swal.fire({
+                        type: 'error',
+                        title: 'Ooops...',
+                        text: 'Something went wrong please check the inputes fields or the routes',
+                        icon: 'error',
+                    })
+                });
+
+            },
+            updateProfile(e){
+                let file = e.target.files[0];
+                let reader = new FileReader();
+                let limit = 1024 * 1024 * 2;
+                if(file['size'] > limit){
+                    swal.fire({
+                        type: 'error',
+                        title: 'Oops...',
+                        text: 'File size should not be greater than 2mb',
+                    })
+                    return false;
+                }
+                reader.onloadend = (file) => {
+                    this.form.photo = reader.result;
+                }
+                reader.readAsDataURL(file);
+
+                
+            }
+        },
+        created() {
+            axios.get("api/profile")
+            .then(({ data }) => (this.form.fill(data)));
         }
     }
 </script>

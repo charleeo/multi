@@ -14,6 +14,12 @@ window.Fire = new Vue();
 // Moment js i for date formating
 import moment from 'moment';
 
+// Import gate
+
+import Gate from './components/Gate';
+
+Vue.prototype.$gate = new Gate(window.user);
+
 // sweetalert componemt
 import swal from 'sweetalert2';
 window.swal = swal;
@@ -122,6 +128,8 @@ Vue.component('passport-clients', require('./components/passport/Clients.vue').d
 Vue.component('passport-authorized-clients', require('./components/passport/AuthorizedClients.vue').default);
 
 Vue.component('passport-personal-access-tokens', require('./components/passport/PersonalAccessTokens.vue').default);
+
+Vue.component('not-found', require('./components/Notfound.vue').default);
 
 const app = new Vue({
 	el: '#app',
